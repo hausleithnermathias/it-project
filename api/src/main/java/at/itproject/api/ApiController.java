@@ -4,40 +4,51 @@ import io.swagger.client.ApiException;
 import io.swagger.client.api.HistoryApi;
 import io.swagger.client.api.PrinterApi;
 import io.swagger.client.model.EventHistoryEntry;
-import io.swagger.client.model.PrintJobHistory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.client.model.Printer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/test")
+@RequestMapping("/api/{id}")
 public class ApiController {
 
-    @GetMapping
-    @ResponseBody public ResponseEntity<String> test() {
-/*
+    @Value("${spring.data.rest.base-path}")
+    String basepath;
+
+    PrinterApi printerApi = new PrinterApi();
+
+    @GetMapping()
+    @ResponseBody
+    public String test() {
+
         HistoryApi historyApi = new HistoryApi();
-        PrinterApi printerApi = new PrinterApi();
-        printerApi.getApiClient().setBasePath("");
         String string = null;
         try {
            List<EventHistoryEntry> list = historyApi.historyEventsGet(null,null, null);
-           string = printerApi.printerStatusGet();
-           list.forEach(l -> System.out.println(l.getMessage()));
+           list.forEach(l -> System.out.println(l));
         } catch (ApiException e) {
             e.printStackTrace();
         }
 
 
         return string;
-        */
- return new ResponseEntity<>("printjob_test, temperature=82 1465839830100400200", HttpStatus.OK);
+    }
+
+    @GetMapping("printstatus")
+    @ResponseBody
+    public String printerStatus(@PathVariable String id) {
+
+        printerApi.getApiClient().setBasePath(basepath +id + "/api/v1");
+
+        try {
+            return printerApi.printerStatusGet();
+        } catch (ApiException e) {
+            return "offline";
+        }
+
     }
 
 }

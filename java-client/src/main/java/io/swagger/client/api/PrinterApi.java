@@ -43,6 +43,7 @@ import io.swagger.client.model.Led;
 import io.swagger.client.model.Material;
 import io.swagger.client.model.Printer;
 import io.swagger.client.model.XYZ;
+import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;

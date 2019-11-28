@@ -22,6 +22,12 @@
         </license>
     </licenses>
 
+    <parent>
+        <groupId>at.itproject</groupId>
+        <artifactId>api-service</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
     <developers>
         <developer>
             <name>Swagger</name>
