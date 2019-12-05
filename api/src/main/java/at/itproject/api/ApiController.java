@@ -33,4 +33,11 @@ public class ApiController {
 
         return apiService.getHotendTemperatures(ip);
     }
+
+    @GetMapping("hot-time")
+    @ResponseBody
+    public String timeSpentHot(@PathVariable String ip) {
+
+        return apiService.getTimeSpentHot(ip);
+    }
 }
