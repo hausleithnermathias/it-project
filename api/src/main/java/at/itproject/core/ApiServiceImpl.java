@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ApiServiceImpl {
@@ -22,7 +23,7 @@ public class ApiServiceImpl {
     @Value("${spring.data.rest.base-path}")
     private String basepath;
 
-    public String getPrinterStatus(String ip){
+    public String getPrinterStatus(String ip) {
         String id = ip.split("\\.")[3];
 
         printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
@@ -38,7 +39,8 @@ public class ApiServiceImpl {
         return "printer_status,printer=" + id + ",weekday=" + strDays[calendar.get(Calendar.DAY_OF_WEEK) - 1] + ",month=" + strMonths[calendar.get(Calendar.MONTH)] + ",year=" + calendar.get(Calendar.YEAR) + " status=\"" + status + "\"";
     }
 
-    public String getHotendTemperatures(String ip){
+    public String getHotendTemperatures(String ip) {
+
         String id = ip.split("\\.")[3];
 
         printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
@@ -46,7 +48,7 @@ public class ApiServiceImpl {
         List<Head> heads;
         List<LineChartDto> measurements = new ArrayList<>();
 
-        try{
+        try {
             heads = printerApi.printerHeadsGet();
 
         } catch (ApiException e) {
@@ -54,15 +56,15 @@ public class ApiServiceImpl {
         }
 
         heads.forEach(head -> head.getExtruders().forEach(extruder -> {
-            LineChartDto lineChartDto = new LineChartDto();
-            lineChartDto.setMeasurement("temperature_hotend");
-            lineChartDto.getTag_set().add(id);
-            lineChartDto.getTag_set().add(extruder.getHotend().getId());
-
-
-        })
+                    LineChartDto lineChartDto = new LineChartDto();
+                    lineChartDto.setMeasurement("temperature_hotend");
+                    lineChartDto.getTag_set().add(id);
+                    lineChartDto.getTag_set().add(extruder.getHotend().getId());
+                    lineChartDto.getField_set().add(extruder.getHotend().getTemperature().getCurrent().toString());
+                    measurements.add(lineChartDto);
+                })
         );
 
-        return "printer_status,printer=" + id + ",weekday=" + calendar.get(Calendar.DAY_OF_WEEK) + ",month=" + calendar.get(Calendar.MONTH) + ",year=" + calendar.get(Calendar.YEAR) + " status ";
+        return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
     }
 }
