@@ -9,11 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Calendar;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/{id}")
 public class ApiController {
+
+
+    Calendar calendar = Calendar.getInstance();
+
 
     @Value("${spring.data.rest.base-path}")
     String basepath;
@@ -37,18 +42,21 @@ public class ApiController {
         return string;
     }
 
-    @GetMapping("printstatus")
+    @GetMapping("status")
     @ResponseBody
     public String printerStatus(@PathVariable String id) {
 
-        printerApi.getApiClient().setBasePath(basepath +id + "/api/v1");
 
+        printerApi.getApiClient().setBasePath(basepath +id + "/api/v1");
+        String status;
         try {
-            return printerApi.printerStatusGet();
+            status = printerApi.printerStatusGet();
+
         } catch (ApiException e) {
-            return "offline";
+            status = "unknown";
         }
 
+        return "printer_status,printer=" + id + ",weekday=" + calendar.get(Calendar.DAY_OF_WEEK) + ",month=" + calendar.get(Calendar.MONTH) + ",year=" + calendar.get(Calendar.YEAR) + " status=\"" + status + "\"";
     }
 
 }
