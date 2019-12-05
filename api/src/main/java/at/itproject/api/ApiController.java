@@ -1,17 +1,8 @@
 package at.itproject.api;
 
 import at.itproject.core.ApiServiceImpl;
-import io.swagger.client.ApiException;
-import io.swagger.client.api.HistoryApi;
-import io.swagger.client.api.PrinterApi;
-import io.swagger.client.model.EventHistoryEntry;
-import io.swagger.client.model.Head;
-import io.swagger.client.model.Printer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
 
 @RestController
 @RequestMapping("/api/{ip}")
@@ -39,5 +30,19 @@ public class ApiController {
     public String timeSpentHot(@PathVariable String ip) {
 
         return apiService.getTimeSpentHot(ip);
+    }
+
+    @GetMapping("material-extruded")
+    @ResponseBody
+    public String materialExtruded(@PathVariable String ip) {
+
+        return apiService.getMaterialExtruded(ip);
+    }
+
+    @GetMapping("printjob-history")
+    @ResponseBody
+    public String printjobHistory(@PathVariable String ip) {
+
+        return apiService.getPrintJobHistory(ip);
     }
 }

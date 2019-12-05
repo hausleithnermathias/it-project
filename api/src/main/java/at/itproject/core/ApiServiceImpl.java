@@ -53,8 +53,8 @@ public class ApiServiceImpl {
                     lineChartDto.setMeasurement("temperature_hotend");
                     lineChartDto.getTag_set().add("printer=" + id);
                     lineChartDto.getTag_set().add("hotend=" + extruder.getHotend().getId().replace(" ", "_"));
-                    lineChartDto.getTag_set().add("weekday=" + calendar.get(Calendar.DAY_OF_WEEK));
-                    lineChartDto.getTag_set().add("month=" + calendar.get(Calendar.MONTH));
+                    lineChartDto.getTag_set().add("weekday=" + strDays[calendar.get(Calendar.DAY_OF_WEEK) - 1]);
+                    lineChartDto.getTag_set().add("month=" + strMonths[calendar.get(Calendar.MONTH)]);
                     lineChartDto.getTag_set().add("year=" + calendar.get(Calendar.YEAR));
                     lineChartDto.getField_set().add("temperature=" + extruder.getHotend().getTemperature().getCurrent().toString());
                     measurements.add(lineChartDto);
@@ -85,8 +85,32 @@ public class ApiServiceImpl {
         return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
     }
 
+    public String getMaterialExtruded(String ip){
+
+        String id = ip.split("\\.")[3];
+        printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
+
+        List<Head> heads = getHead();
+        List<LineChartDto> measurements = new ArrayList<>();
+
+        heads.forEach(head -> head.getExtruders().forEach(extruder -> {
+                    LineChartDto lineChartDto = new LineChartDto();
+                    lineChartDto.setMeasurement("temperature_hotend");
+                    lineChartDto.getTag_set().add("printer=" + id);
+                    lineChartDto.getTag_set().add("hotend=" + extruder.getHotend().getId().replace(" ", "_"));
+                    lineChartDto.getField_set().add("material-extruded=" + extruder.getHotend().getStatistics().getMaterialExtruded());
+                    measurements.add(lineChartDto);
+                })
+        );
+
+        return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
+    }
+
+    public String getPrintJobHistory(String ip){
+        return null;
+    }
+
     private List<Head> getHead(){
-        List<Head> heads;
 
         try {
             return printerApi.printerHeadsGet();
