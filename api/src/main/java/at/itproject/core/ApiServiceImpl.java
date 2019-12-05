@@ -1,6 +1,7 @@
 package at.itproject.core;
 
 import io.swagger.client.ApiException;
+import io.swagger.client.api.HistoryApi;
 import io.swagger.client.api.PrinterApi;
 import io.swagger.client.model.Head;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,11 +16,13 @@ import java.util.stream.Collectors;
 public class ApiServiceImpl {
 
     private PrinterApi printerApi = new PrinterApi();
+    private HistoryApi historyApi = new HistoryApi();
+
     private Calendar calendar = Calendar.getInstance();
-    String[] strDays = new String[] { "Sunday", "Monday", "Tuesday",
-            "Wednesday", "Thursday", "Friday", "Saturday" };
-    String[] strMonths = new String[] { "January", "February", "March",
-            "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+    String[] strDays = new String[]{"Sunday", "Monday", "Tuesday",
+            "Wednesday", "Thursday", "Friday", "Saturday"};
+    String[] strMonths = new String[]{"January", "February", "March",
+            "April", "May", "June", "July", "August", "September", "October", "November", "December"};
     @Value("${spring.data.rest.base-path}")
     private String basepath;
 
@@ -48,23 +51,26 @@ public class ApiServiceImpl {
         List<Head> heads = getHead();
         List<LineChartDto> measurements = new ArrayList<>();
 
-        heads.forEach(head -> head.getExtruders().forEach(extruder -> {
-                    LineChartDto lineChartDto = new LineChartDto();
-                    lineChartDto.setMeasurement("temperature_hotend");
-                    lineChartDto.getTag_set().add("printer=" + id);
-                    lineChartDto.getTag_set().add("hotend=" + extruder.getHotend().getId().replace(" ", "_"));
-                    lineChartDto.getTag_set().add("weekday=" + strDays[calendar.get(Calendar.DAY_OF_WEEK) - 1]);
-                    lineChartDto.getTag_set().add("month=" + strMonths[calendar.get(Calendar.MONTH)]);
-                    lineChartDto.getTag_set().add("year=" + calendar.get(Calendar.YEAR));
-                    lineChartDto.getField_set().add("temperature=" + extruder.getHotend().getTemperature().getCurrent().toString());
-                    measurements.add(lineChartDto);
-                })
-        );
+        if (heads != null) {
+            heads.forEach(head -> head.getExtruders().forEach(extruder -> {
+                        LineChartDto lineChartDto = new LineChartDto();
+                        lineChartDto.setMeasurement("temperature_hotend");
+                        lineChartDto.getTag_set().add("printer=" + id);
+                        lineChartDto.getTag_set().add("hotend=" + extruder.getHotend().getId().replace(" ", "_"));
+                        lineChartDto.getTag_set().add("weekday=" + strDays[calendar.get(Calendar.DAY_OF_WEEK) - 1]);
+                        lineChartDto.getTag_set().add("month=" + strMonths[calendar.get(Calendar.MONTH)]);
+                        lineChartDto.getTag_set().add("year=" + calendar.get(Calendar.YEAR));
+                        lineChartDto.getField_set().add("temperature=" + extruder.getHotend().getTemperature().getCurrent().toString());
+                        measurements.add(lineChartDto);
+                    })
+            );
 
-        return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
+            return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
+        }
+        return null;
     }
 
-    public String getTimeSpentHot(String ip){
+    public String getTimeSpentHot(String ip) {
 
         String id = ip.split("\\.")[3];
         printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
@@ -85,7 +91,7 @@ public class ApiServiceImpl {
         return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
     }
 
-    public String getMaterialExtruded(String ip){
+    public String getMaterialExtruded(String ip) {
 
         String id = ip.split("\\.")[3];
         printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
@@ -106,11 +112,16 @@ public class ApiServiceImpl {
         return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
     }
 
-    public String getPrintJobHistory(String ip){
+    public String getPrintJobHistory(String ip) {
+
+        String id = ip.split("\\.")[3];
+        historyApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
+
+
         return null;
     }
 
-    private List<Head> getHead(){
+    private List<Head> getHead() {
 
         try {
             return printerApi.printerHeadsGet();
