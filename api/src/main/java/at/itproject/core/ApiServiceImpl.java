@@ -16,6 +16,10 @@ public class ApiServiceImpl {
 
     private PrinterApi printerApi = new PrinterApi();
     private Calendar calendar = Calendar.getInstance();
+    String[] strDays = new String[] { "Sunday", "Monday", "Tuesday",
+            "Wednesday", "Thursday", "Friday", "Saturday" };
+    String[] strMonths = new String[] { "January", "February", "March",
+            "April", "May", "June", "July", "August", "September", "October", "November", "December" };
     @Value("${spring.data.rest.base-path}")
     private String basepath;
 
@@ -32,7 +36,7 @@ public class ApiServiceImpl {
             status = "unknown";
         }
 
-        return "printer_status,printer=" + id + ",weekday=" + calendar.get(Calendar.DAY_OF_WEEK) + ",month=" + calendar.get(Calendar.MONTH) + ",year=" + calendar.get(Calendar.YEAR) + " status=\"" + status + "\"";
+        return "printer_status,printer=" + id + ",weekday=" + strDays[calendar.get(Calendar.DAY_OF_WEEK) - 1] + ",month=" + strMonths[calendar.get(Calendar.MONTH)] + ",year=" + calendar.get(Calendar.YEAR) + " status=\"" + status + "\"";
     }
 
     public String getHotendTemperatures(String ip) {
