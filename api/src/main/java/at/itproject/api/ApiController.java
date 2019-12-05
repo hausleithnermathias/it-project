@@ -1,62 +1,36 @@
 package at.itproject.api;
 
+import at.itproject.core.ApiServiceImpl;
 import io.swagger.client.ApiException;
 import io.swagger.client.api.HistoryApi;
 import io.swagger.client.api.PrinterApi;
 import io.swagger.client.model.EventHistoryEntry;
+import io.swagger.client.model.Head;
 import io.swagger.client.model.Printer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 
 @RestController
-@RequestMapping("/api/{id}")
+@RequestMapping("/api/{ip}")
 public class ApiController {
 
-
-    Calendar calendar = Calendar.getInstance();
-
-
-    @Value("${spring.data.rest.base-path}")
-    String basepath;
-
-    PrinterApi printerApi = new PrinterApi();
-
-    @GetMapping()
-    @ResponseBody
-    public String test() {
-
-        HistoryApi historyApi = new HistoryApi();
-        String string = null;
-        try {
-           List<EventHistoryEntry> list = historyApi.historyEventsGet(null,null, null);
-           list.forEach(l -> System.out.println(l));
-        } catch (ApiException e) {
-            e.printStackTrace();
-        }
-
-
-        return string;
-    }
+    @Autowired
+    ApiServiceImpl apiService;
 
     @GetMapping("status")
     @ResponseBody
-    public String printerStatus(@PathVariable String id) {
+    public String printerStatus(@PathVariable String ip) {
 
-
-        printerApi.getApiClient().setBasePath(basepath +id + "/api/v1");
-        String status;
-        try {
-            status = printerApi.printerStatusGet();
-
-        } catch (ApiException e) {
-            status = "unknown";
-        }
-
-        return "printer_status,printer=" + id + ",weekday=" + calendar.get(Calendar.DAY_OF_WEEK) + ",month=" + calendar.get(Calendar.MONTH) + ",year=" + calendar.get(Calendar.YEAR) + " status=\"" + status + "\"";
+        return apiService.getPrinterStatus(ip);
     }
 
+    @GetMapping("hotend-temperatures")
+    @ResponseBody
+    public String hotendTemperatures(@PathVariable String ip) {
+
+        return apiService.getHotendTemperatures(ip);
+    }
 }
