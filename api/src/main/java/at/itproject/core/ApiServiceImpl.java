@@ -6,6 +6,7 @@ import io.swagger.client.api.PrinterApi;
 import io.swagger.client.model.Head;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -50,7 +51,7 @@ public class ApiServiceImpl {
 
         List<Head> heads = getHead();
         List<LineChartDto> measurements = new ArrayList<>();
-
+        RestTemplate rt = new RestTemplate();
         if (heads != null) {
             heads.forEach(head -> head.getExtruders().forEach(extruder -> {
                         LineChartDto lineChartDto = new LineChartDto();
@@ -64,7 +65,7 @@ public class ApiServiceImpl {
                         measurements.add(lineChartDto);
                     })
             );
-
+            
             return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
         }
         return null;
