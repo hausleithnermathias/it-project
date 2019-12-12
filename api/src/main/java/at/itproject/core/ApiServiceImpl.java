@@ -4,6 +4,8 @@ import io.swagger.client.ApiException;
 import io.swagger.client.api.HistoryApi;
 import io.swagger.client.api.PrinterApi;
 import io.swagger.client.model.Head;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -16,7 +18,6 @@ import java.util.stream.Collectors;
 @Service
 public class ApiServiceImpl {
 
-    private PrinterApi printerApi = new PrinterApi();
     private HistoryApi historyApi = new HistoryApi();
 
     private Calendar calendar = Calendar.getInstance();
@@ -50,6 +51,7 @@ public class ApiServiceImpl {
 
         List<LineChartDto> measurements = new ArrayList<>();
         for(int i=31; i<=33; i++) {
+            PrinterApi printerApi = new PrinterApi();
             printerApi.getApiClient().setBasePath(basepath + "10.6.0" + i + "/api/v1");
             String status;
             try {
@@ -74,13 +76,13 @@ public class ApiServiceImpl {
     public String getHotendTemperatures(String ip) {
 
         String id = ip.split("\\.")[3];
-
+        PrinterApi printerApi = new PrinterApi();
         printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
         printerApi.getApiClient().setConnectTimeout(5000);
 
-        List<Head> heads = getHead();
+        List<Head> heads = getHead(printerApi);
         List<LineChartDto> measurements = new ArrayList<>();
-        RestTemplate rt = new RestTemplate();
+
         if (heads != null) {
             heads.forEach(head -> head.getExtruders().forEach(extruder -> {
                         LineChartDto lineChartDto = new LineChartDto();
@@ -113,11 +115,11 @@ public class ApiServiceImpl {
     }
 
     public String getTimeSpentHot(String ip) {
-
+        PrinterApi printerApi = new PrinterApi();
         String id = ip.split("\\.")[3];
         printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
 
-        List<Head> heads = getHead();
+        List<Head> heads = getHead(printerApi);
         List<LineChartDto> measurements = new ArrayList<>();
 
         heads.forEach(head -> head.getExtruders().forEach(extruder -> {
@@ -135,10 +137,11 @@ public class ApiServiceImpl {
 
     public String getMaterialExtruded(String ip) {
 
+        PrinterApi printerApi = new PrinterApi();
         String id = ip.split("\\.")[3];
         printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
 
-        List<Head> heads = getHead();
+        List<Head> heads = getHead(printerApi);
         List<LineChartDto> measurements = new ArrayList<>();
 
         heads.forEach(head -> head.getExtruders().forEach(extruder -> {
@@ -162,7 +165,7 @@ public class ApiServiceImpl {
         return null;
     }
 
-    private List<Head> getHead() {
+    private List<Head> getHead(PrinterApi printerApi) {
 
         try {
             return printerApi.printerHeadsGet();
