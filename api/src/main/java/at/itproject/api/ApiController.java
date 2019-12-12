@@ -16,6 +16,7 @@ public class ApiController {
     public String printerStatus(@PathVariable String ip) {
 
         return apiService.getPrinterStatus(ip);
+        //apiService.getPrinterStatus(ip);
     }
 
     @GetMapping("hotend-temperatures")
