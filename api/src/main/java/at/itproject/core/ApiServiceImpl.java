@@ -27,6 +27,7 @@ public class ApiServiceImpl {
     @Value("${spring.data.rest.base-path}")
     private String basepath;
 
+    /*
     public String getPrinterStatus(String ip) {
         String id = ip.split("\\.")[3];
 
@@ -42,12 +43,40 @@ public class ApiServiceImpl {
 
         return "printer_status,printer=" + id + ",weekday=" + strDays[calendar.get(Calendar.DAY_OF_WEEK) - 1] + ",month=" + strMonths[calendar.get(Calendar.MONTH)] + ",year=" + calendar.get(Calendar.YEAR) + " status=\"" + status + "\"";
     }
+     */
+
+    public String getPrinterStatus(String ip) {
+      //  String id = ip.split("\\.")[3];
+
+        List<LineChartDto> measurements = new ArrayList<>();
+        for(int i=31; i<=33; i++) {
+            printerApi.getApiClient().setBasePath(basepath + "10.6.0" + i + "/api/v1");
+            String status;
+            try {
+                status = printerApi.printerStatusGet();
+            } catch (ApiException e) {
+                status = "unknown";
+            }
+            LineChartDto lineChartDto = new LineChartDto();
+            lineChartDto.setMeasurement("printer_status");
+            lineChartDto.getTag_set().add("printer=" + i);
+            lineChartDto.getTag_set().add("weekday=" + strDays[calendar.get(Calendar.DAY_OF_WEEK) - 1]);
+            lineChartDto.getTag_set().add("month=" + strMonths[calendar.get(Calendar.MONTH)]);
+            lineChartDto.getTag_set().add("year=" + calendar.get(Calendar.YEAR));
+            lineChartDto.getField_set().add("status=" + status);
+            measurements.add(lineChartDto);
+        }
+
+        return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
+        //System.out.println(measurements.stream().map(Object::toString).collect(Collectors.joining("\n")));
+    }
 
     public String getHotendTemperatures(String ip) {
 
         String id = ip.split("\\.")[3];
 
         printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
+        printerApi.getApiClient().setConnectTimeout(5000);
 
         List<Head> heads = getHead();
         List<LineChartDto> measurements = new ArrayList<>();
@@ -68,7 +97,19 @@ public class ApiServiceImpl {
             
             return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
         }
-        return null;
+        else {
+            LineChartDto lineChartDto = new LineChartDto();
+            lineChartDto.setMeasurement("temperature_hotend");
+            lineChartDto.getTag_set().add("printer=" + id);
+            lineChartDto.getTag_set().add("hotend=" + "test");
+            lineChartDto.getTag_set().add("weekday=" + strDays[calendar.get(Calendar.DAY_OF_WEEK) - 1]);
+            lineChartDto.getTag_set().add("month=" + strMonths[calendar.get(Calendar.MONTH)]);
+            lineChartDto.getTag_set().add("year=" + calendar.get(Calendar.YEAR));
+            lineChartDto.getField_set().add("temperature=" + -1);
+
+            return lineChartDto.toString();
+        }
+
     }
 
     public String getTimeSpentHot(String ip) {
@@ -117,7 +158,6 @@ public class ApiServiceImpl {
 
         String id = ip.split("\\.")[3];
         historyApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
-
 
         return null;
     }
