@@ -1,16 +1,11 @@
 package at.itproject.core;
 
-import io.swagger.client.ApiClient;
 import io.swagger.client.ApiException;
 import io.swagger.client.api.HistoryApi;
 import io.swagger.client.api.PrinterApi;
 import io.swagger.client.model.Head;
-import io.swagger.client.model.Printer;
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Calendar;
