@@ -1,9 +1,11 @@
 package at.itproject.core;
 
+import io.swagger.client.ApiClient;
 import io.swagger.client.ApiException;
 import io.swagger.client.api.HistoryApi;
 import io.swagger.client.api.PrinterApi;
 import io.swagger.client.model.Head;
+import io.swagger.client.model.Printer;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,8 +19,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class ApiServiceImpl {
-
-    private HistoryApi historyApi = new HistoryApi();
 
     private Calendar calendar = Calendar.getInstance();
     String[] strDays = new String[]{"Sunday", "Monday", "Tuesday",
@@ -47,27 +47,27 @@ public class ApiServiceImpl {
      */
 
     public String getPrinterStatus(String ip) {
-      //  String id = ip.split("\\.")[3];
+
+        String id = ip.split("\\.")[3];
+        PrinterApi printerApi = setApi(ip);
 
         List<LineChartDto> measurements = new ArrayList<>();
-        for(int i=31; i<=33; i++) {
-            PrinterApi printerApi = new PrinterApi();
-            printerApi.getApiClient().setBasePath(basepath + "10.6.0" + i + "/api/v1");
-            String status;
-            try {
-                status = printerApi.printerStatusGet();
-            } catch (ApiException e) {
-                status = "unknown";
-            }
-            LineChartDto lineChartDto = new LineChartDto();
-            lineChartDto.setMeasurement("printer_status");
-            lineChartDto.getTag_set().add("printer=" + i);
-            lineChartDto.getTag_set().add("weekday=" + strDays[calendar.get(Calendar.DAY_OF_WEEK) - 1]);
-            lineChartDto.getTag_set().add("month=" + strMonths[calendar.get(Calendar.MONTH)]);
-            lineChartDto.getTag_set().add("year=" + calendar.get(Calendar.YEAR));
-            lineChartDto.getField_set().add("status=" + status);
-            measurements.add(lineChartDto);
+        String status;
+
+        try {
+            status = printerApi.printerStatusGet();
+        } catch (ApiException e) {
+            status = "unknown";
         }
+        LineChartDto lineChartDto = new LineChartDto();
+        lineChartDto.setMeasurement("printer_status");
+        lineChartDto.getTag_set().add("printer=" + id);
+        lineChartDto.getTag_set().add("weekday=" + strDays[calendar.get(Calendar.DAY_OF_WEEK) - 1]);
+        lineChartDto.getTag_set().add("month=" + strMonths[calendar.get(Calendar.MONTH)]);
+        lineChartDto.getTag_set().add("year=" + calendar.get(Calendar.YEAR));
+        lineChartDto.getField_set().add("status=" + status);
+        measurements.add(lineChartDto);
+
 
         return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
         //System.out.println(measurements.stream().map(Object::toString).collect(Collectors.joining("\n")));
@@ -76,9 +76,7 @@ public class ApiServiceImpl {
     public String getHotendTemperatures(String ip) {
 
         String id = ip.split("\\.")[3];
-        PrinterApi printerApi = new PrinterApi();
-        printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
-        printerApi.getApiClient().setConnectTimeout(5000);
+        PrinterApi printerApi = setApi(ip);
 
         List<Head> heads = getHead(printerApi);
         List<LineChartDto> measurements = new ArrayList<>();
@@ -96,10 +94,9 @@ public class ApiServiceImpl {
                         measurements.add(lineChartDto);
                     })
             );
-            
+
             return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
-        }
-        else {
+        } else {
             LineChartDto lineChartDto = new LineChartDto();
             lineChartDto.setMeasurement("temperature_hotend");
             lineChartDto.getTag_set().add("printer=" + id);
@@ -115,9 +112,9 @@ public class ApiServiceImpl {
     }
 
     public String getTimeSpentHot(String ip) {
-        PrinterApi printerApi = new PrinterApi();
+
         String id = ip.split("\\.")[3];
-        printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
+        PrinterApi printerApi = setApi(ip);
 
         List<Head> heads = getHead(printerApi);
         List<LineChartDto> measurements = new ArrayList<>();
@@ -137,9 +134,8 @@ public class ApiServiceImpl {
 
     public String getMaterialExtruded(String ip) {
 
-        PrinterApi printerApi = new PrinterApi();
         String id = ip.split("\\.")[3];
-        printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
+        PrinterApi printerApi = setApi(ip);
 
         List<Head> heads = getHead(printerApi);
         List<LineChartDto> measurements = new ArrayList<>();
@@ -160,6 +156,8 @@ public class ApiServiceImpl {
     public String getPrintJobHistory(String ip) {
 
         String id = ip.split("\\.")[3];
+
+        HistoryApi historyApi = new HistoryApi();
         historyApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
 
         return null;
@@ -172,5 +170,14 @@ public class ApiServiceImpl {
         } catch (ApiException e) {
             return null;
         }
+    }
+
+    public PrinterApi setApi(String ip){
+
+        PrinterApi printerApi = new PrinterApi();
+        printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
+        printerApi.getApiClient().setConnectTimeout(5000);
+
+        return printerApi;
     }
 }
