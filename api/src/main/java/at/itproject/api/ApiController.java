@@ -46,4 +46,11 @@ public class ApiController {
 
         return apiService.getPrintJobHistory(ip);
     }
+
+    @GetMapping("printjob-progress")
+    @ResponseBody
+    public String printjobProgress(@PathVariable String ip) {
+
+        return apiService.getPrintJobProgress(ip);
+    }
 }
