@@ -2,6 +2,7 @@ package at.itproject.core;
 
 import io.swagger.client.ApiException;
 import io.swagger.client.api.HistoryApi;
+import io.swagger.client.api.MaterialsApi;
 import io.swagger.client.api.PrintJobApi;
 import io.swagger.client.api.PrinterApi;
 import io.swagger.client.model.Head;
@@ -14,7 +15,6 @@ import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,18 +22,13 @@ import java.util.stream.Collectors;
 //@Scope("Prototype")
 public class ApiServiceImpl {
 
-
-
     private Calendar calendar = Calendar.getInstance();
     String[] strDays = new String[]{"Sunday", "Monday", "Tuesday",
             "Wednesday", "Thursday", "Friday", "Saturday"};
     String[] strMonths = new String[]{"January", "February", "March",
             "April", "May", "June", "July", "August", "September", "October", "November", "December"};
-    String uuidOld31 = "";
-    String uuidOld32 = "";
-    String uuidOld33 = "";
-    @Value("${spring.data.rest.base-path}")
-    private String basepath;
+    //@Value("${spring.data.rest.base-path}")
+    private String basepath = "http://";
 
     public static boolean pingHost(String host,int timeout) {
         try{
@@ -54,7 +49,6 @@ public class ApiServiceImpl {
         if(pingHost(ip,500)) {
             try {
                 status = printerApi.printerStatusGet();
-
             } catch (ApiException e) {
                 status = "unknown";
             }
@@ -82,9 +76,6 @@ public class ApiServiceImpl {
                             lineChartDto.setMeasurement("temperature_hotend");
                             lineChartDto.getTag_set().add("printer="+id);
                             lineChartDto.getTag_set().add("hotend="+extruder.getHotend().getId().replace(" ","_"));
-                            lineChartDto.getTag_set().add("weekday="+strDays[calendar.get(Calendar.DAY_OF_WEEK)-1]);
-                            lineChartDto.getTag_set().add("month="+strMonths[calendar.get(Calendar.MONTH)]);
-                            lineChartDto.getTag_set().add("year="+calendar.get(Calendar.YEAR));
                             lineChartDto.getField_set().add("temperature="+extruder.getHotend().getTemperature().getCurrent().toString());
                             measurements.add(lineChartDto);
                         })
@@ -112,16 +103,22 @@ public class ApiServiceImpl {
                             lineChartDto.setMeasurement("time_spent_hot");
                             lineChartDto.getTag_set().add("printer="+id);
                             lineChartDto.getTag_set().add("hotend="+extruder.getHotend().getId().replace(" ","_"));
+                            lineChartDto.getTag_set().add("weekday="+strDays[calendar.get(Calendar.DAY_OF_WEEK)-1]);
+                            lineChartDto.getTag_set().add("month="+strMonths[calendar.get(Calendar.MONTH)]);
+                            lineChartDto.getTag_set().add("year="+calendar.get(Calendar.YEAR));
                             lineChartDto.getField_set().add("time-spent-hot="+extruder.getHotend().getStatistics().getTimeSpentHot());
                             measurements.add(lineChartDto);
                         })
                 );
+                // Logging
+                System.out.println(measurements.stream().map(Object::toString).collect(Collectors.joining("\n")));
 
                 return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
             }
         }
         return null;
     }
+
 
     public String getMaterialExtruded(String ip) {
         PrinterApi printerApi = new PrinterApi();
@@ -134,16 +131,59 @@ public class ApiServiceImpl {
         if(pingHost(ip,500)){
             heads=getHead(printerApi);
             if(heads != null){
-
                 heads.forEach(head->head.getExtruders().forEach(extruder->{
                             LineChartDto lineChartDto=new LineChartDto();
                             lineChartDto.setMeasurement("material_extruded");
                             lineChartDto.getTag_set().add("printer="+id);
                             lineChartDto.getTag_set().add("hotend="+extruder.getHotend().getId().replace(" ","_"));
+                            lineChartDto.getTag_set().add("weekday="+strDays[calendar.get(Calendar.DAY_OF_WEEK)-1]);
+                            lineChartDto.getTag_set().add("month="+strMonths[calendar.get(Calendar.MONTH)]);
+                            lineChartDto.getTag_set().add("year="+calendar.get(Calendar.YEAR));
                             lineChartDto.getField_set().add("material-extruded="+extruder.getHotend().getStatistics().getMaterialExtruded());
                             measurements.add(lineChartDto);
                         })
                 );
+                // Logging
+                System.out.println(measurements.stream().map(Object::toString).collect(Collectors.joining("\n")));
+
+                return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
+            }
+        }
+        return null;
+    }
+
+
+    public String getMaterialRemaining(String ip) {
+        PrinterApi printerApi = new PrinterApi();
+        String id = ip.split("\\.")[3];
+        printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
+
+        MaterialsApi materialsApi = new MaterialsApi();
+
+
+        List<Head> heads;
+        List<LineChartDto> measurements = new ArrayList<>();
+
+        if(pingHost(ip,500)){
+            heads=getHead(printerApi);
+            if(heads != null){
+                heads.forEach(head->head.getExtruders().forEach(extruder->{
+                            LineChartDto lineChartDto=new LineChartDto();
+                            lineChartDto.setMeasurement("material_remaining");
+                            lineChartDto.getTag_set().add("printer="+id);
+                            lineChartDto.getTag_set().add("hotend="+extruder.getHotend().getId().replace(" ","_"));
+                            lineChartDto.getTag_set().add("weekday="+strDays[calendar.get(Calendar.DAY_OF_WEEK)-1]);
+                            lineChartDto.getTag_set().add("month="+strMonths[calendar.get(Calendar.MONTH)]);
+                            lineChartDto.getTag_set().add("year="+calendar.get(Calendar.YEAR));
+                            lineChartDto.getTag_set().add("guid="+extruder.getActiveMaterial().getGUID());
+                            lineChartDto.getField_set().add("material-remaining="+extruder.getActiveMaterial().getLengthRemaining().intValue()*(-1));
+                            if(extruder.getActiveMaterial().getGUID().compareTo("")!=0 || (extruder.getActiveMaterial().getLengthRemaining().intValue()!=-1)) {
+                                measurements.add(lineChartDto);
+                            }
+                        })
+                );
+                // Logging
+                System.out.println(measurements.stream().map(Object::toString).collect(Collectors.joining("\n")));
 
                 return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
             }
@@ -156,60 +196,40 @@ public class ApiServiceImpl {
         String id = ip.split("\\.")[3];
         HistoryApi historyApi = new HistoryApi();
         historyApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
-        PrintJobHistory history;
-        String result = "";
-        String uuidNew = "";
 
         if(pingHost(ip,500)){
             try {
-                history=historyApi.historyPrintJobsGet(BigDecimal.valueOf(0),BigDecimal.valueOf(1)).iterator().next();
-                uuidNew=history.getUuid();
-                result=history.getResult().toString();
+                PrintJobHistory history=historyApi.historyPrintJobsGet(BigDecimal.valueOf(0),BigDecimal.valueOf(1)).iterator().next();
+                String uuid=history.getUuid();
+                String result=history.getResult().toString();
+                return "printjob_history,result="+result+",printer="+id+",weekday="+strDays[calendar.get(Calendar.DAY_OF_WEEK)-1]+",month="+strMonths[calendar.get(Calendar.MONTH)]+",year="+calendar.get(Calendar.YEAR)+" uuid=\""+uuid+"\"";
             } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            if(id.compareTo("31")==0){
-                if(uuidOld31.compareTo(uuidNew) != 0){
-                    uuidOld31=uuidNew;
-                    return "printjob_history,printer="+id+",weekday="+strDays[calendar.get(Calendar.DAY_OF_WEEK)-1]+",month="+strMonths[calendar.get(Calendar.MONTH)]+",year="+calendar.get(Calendar.YEAR)+" result=\""+result+"\"";
-                }
-            }
-
-            if(id.compareTo("32")==0){
-                if(uuidOld32.compareTo(uuidNew) != 0){
-                    uuidOld32=uuidNew;
-                    return "printjob_history,printer="+id+",weekday="+strDays[calendar.get(Calendar.DAY_OF_WEEK)-1]+",month="+strMonths[calendar.get(Calendar.MONTH)]+",year="+calendar.get(Calendar.YEAR)+" result=\""+result+"\"";
-                }
-            }
-
-            if(id.compareTo("33")==0){
-                if(uuidOld33.compareTo(uuidNew) != 0){
-                    uuidOld33=uuidNew;
-                    return "printjob_history,printer="+id+",weekday="+strDays[calendar.get(Calendar.DAY_OF_WEEK)-1]+",month="+strMonths[calendar.get(Calendar.MONTH)]+",year="+calendar.get(Calendar.YEAR)+" result=\""+result+"\"";
-                }
+                return null;
             }
         }
         return null;
     }
 
-    // TODO: Exception handling if no job is running
     public String getPrintJobProgress(String ip) {
         String id=ip.split("\\.")[3];
         PrintJobApi printJobApi=new PrintJobApi();
+        PrinterApi printerApi=new PrinterApi();
         printJobApi.getApiClient().setBasePath(basepath+ip+"/api/v1");
-        long progress = 0;
-        String name = "";
+        printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
+        long progress;
+        String name;
 
         if(pingHost(ip,500)){
             try {
-                progress=Math.round(printJobApi.printJobProgressGet().doubleValue()*100);
-                name=printJobApi.printJobNameGet();
+                if(printerApi.printerStatusGet().compareTo("printing")==0) {
+                    progress=Math.round(printJobApi.printJobProgressGet().doubleValue()*100);
+                    name=printJobApi.printJobNameGet();
+                    if(name.compareTo("")!=0){
+                        return "printjob_progress,printer="+id+",jobname="+name+" progress=" + progress;
+                    }
+                }
             } catch (Exception e) {
-                e.printStackTrace();
-            }
-            if(name.compareTo("")!=0){
-                return "printjob_progress,printer="+id+",jobname="+name+" progress=" + progress;
+                return null;
             }
         }
         return null;
