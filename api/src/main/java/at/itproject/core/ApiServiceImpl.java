@@ -30,6 +30,8 @@ public class ApiServiceImpl {
     //@Value("${spring.data.rest.base-path}")
     private String basepath = "http://";
 
+    private int i = 1;
+
     public static boolean pingHost(String host,int timeout) {
         try{
             InetAddress address = InetAddress.getByName(host);
@@ -75,7 +77,8 @@ public class ApiServiceImpl {
                             LineChartDto lineChartDto=new LineChartDto();
                             lineChartDto.setMeasurement("temperature_hotend");
                             lineChartDto.getTag_set().add("printer="+id);
-                            lineChartDto.getTag_set().add("hotend="+extruder.getHotend().getId().replace(" ","_"));
+                            lineChartDto.getTag_set().add("extruder="+ i);
+                            lineChartDto.getTag_set().add("nozzleType="+extruder.getHotend().getId().replace(" ","_"));
                             lineChartDto.getField_set().add("temperature="+extruder.getHotend().getTemperature().getCurrent().toString());
                             measurements.add(lineChartDto);
                         })
@@ -102,8 +105,8 @@ public class ApiServiceImpl {
                             LineChartDto lineChartDto=new LineChartDto();
                             lineChartDto.setMeasurement("time_spent_hot");
                             lineChartDto.getTag_set().add("printer="+id);
-                            lineChartDto.getTag_set().add("hotend="+extruder.getHotend().getId().replace(" ","_"));
-                            lineChartDto.getTag_set().add("weekday="+strDays[calendar.get(Calendar.DAY_OF_WEEK)-1]);
+                            lineChartDto.getTag_set().add("extruder="+ i);
+                            lineChartDto.getTag_set().add("nozzleType="+extruder.getHotend().getId().replace(" ","_"));                            lineChartDto.getTag_set().add("weekday="+strDays[calendar.get(Calendar.DAY_OF_WEEK)-1]);
                             lineChartDto.getTag_set().add("month="+strMonths[calendar.get(Calendar.MONTH)]);
                             lineChartDto.getTag_set().add("year="+calendar.get(Calendar.YEAR));
                             lineChartDto.getField_set().add("time-spent-hot="+extruder.getHotend().getStatistics().getTimeSpentHot());
@@ -135,16 +138,15 @@ public class ApiServiceImpl {
                             LineChartDto lineChartDto=new LineChartDto();
                             lineChartDto.setMeasurement("material_extruded");
                             lineChartDto.getTag_set().add("printer="+id);
-                            lineChartDto.getTag_set().add("hotend="+extruder.getHotend().getId().replace(" ","_"));
-                            lineChartDto.getTag_set().add("weekday="+strDays[calendar.get(Calendar.DAY_OF_WEEK)-1]);
+                            lineChartDto.getTag_set().add("extruder="+ i);
+                            lineChartDto.getTag_set().add("nozzleType="+extruder.getHotend().getId().replace(" ","_"));                            lineChartDto.getTag_set().add("weekday="+strDays[calendar.get(Calendar.DAY_OF_WEEK)-1]);
                             lineChartDto.getTag_set().add("month="+strMonths[calendar.get(Calendar.MONTH)]);
                             lineChartDto.getTag_set().add("year="+calendar.get(Calendar.YEAR));
                             lineChartDto.getField_set().add("material-extruded="+extruder.getHotend().getStatistics().getMaterialExtruded());
                             measurements.add(lineChartDto);
                         })
                 );
-                // Logging
-                System.out.println(measurements.stream().map(Object::toString).collect(Collectors.joining("\n")));
+
 
                 return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
             }
