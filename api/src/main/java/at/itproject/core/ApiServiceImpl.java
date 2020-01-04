@@ -77,7 +77,7 @@ public class ApiServiceImpl {
                             LineChartDto lineChartDto=new LineChartDto();
                             lineChartDto.setMeasurement("temperature_hotend");
                             lineChartDto.getTag_set().add("printer="+id);
-                            lineChartDto.getTag_set().add("extruder="+ i);
+                            lineChartDto.getTag_set().add("extruder="+ i++);
                             lineChartDto.getTag_set().add("nozzleType="+extruder.getHotend().getId().replace(" ","_"));
                             lineChartDto.getField_set().add("temperature="+extruder.getHotend().getTemperature().getCurrent().toString());
                             measurements.add(lineChartDto);
@@ -105,7 +105,7 @@ public class ApiServiceImpl {
                             LineChartDto lineChartDto=new LineChartDto();
                             lineChartDto.setMeasurement("time_spent_hot");
                             lineChartDto.getTag_set().add("printer="+id);
-                            lineChartDto.getTag_set().add("extruder="+ i);
+                            lineChartDto.getTag_set().add("extruder="+ i++);
                             lineChartDto.getTag_set().add("nozzleType="+extruder.getHotend().getId().replace(" ","_"));                            lineChartDto.getTag_set().add("weekday="+strDays[calendar.get(Calendar.DAY_OF_WEEK)-1]);
                             lineChartDto.getTag_set().add("month="+strMonths[calendar.get(Calendar.MONTH)]);
                             lineChartDto.getTag_set().add("year="+calendar.get(Calendar.YEAR));
@@ -138,7 +138,7 @@ public class ApiServiceImpl {
                             LineChartDto lineChartDto=new LineChartDto();
                             lineChartDto.setMeasurement("material_extruded");
                             lineChartDto.getTag_set().add("printer="+id);
-                            lineChartDto.getTag_set().add("extruder="+ i);
+                            lineChartDto.getTag_set().add("extruder="+ i++);
                             lineChartDto.getTag_set().add("nozzleType="+extruder.getHotend().getId().replace(" ","_"));                            lineChartDto.getTag_set().add("weekday="+strDays[calendar.get(Calendar.DAY_OF_WEEK)-1]);
                             lineChartDto.getTag_set().add("month="+strMonths[calendar.get(Calendar.MONTH)]);
                             lineChartDto.getTag_set().add("year="+calendar.get(Calendar.YEAR));
