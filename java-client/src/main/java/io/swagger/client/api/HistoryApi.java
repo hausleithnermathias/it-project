@@ -41,7 +41,7 @@ public class HistoryApi {
     private ApiClient apiClient;
 
     public HistoryApi() {
-        this(Configuration.getDefaultApiClient());
+        this.apiClient = new ApiClient();
     }
 
     public HistoryApi(ApiClient apiClient) {

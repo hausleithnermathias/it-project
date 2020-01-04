@@ -39,7 +39,7 @@ public class MaterialsApi {
     private ApiClient apiClient;
 
     public MaterialsApi() {
-        this(Configuration.getDefaultApiClient());
+        this.apiClient = new ApiClient();
     }
 
     public MaterialsApi(ApiClient apiClient) {

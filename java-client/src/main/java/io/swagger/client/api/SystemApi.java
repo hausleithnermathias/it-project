@@ -42,7 +42,7 @@ public class SystemApi {
     private ApiClient apiClient;
 
     public SystemApi() {
-        this(Configuration.getDefaultApiClient());
+        this.apiClient = new ApiClient();
     }
 
     public SystemApi(ApiClient apiClient) {

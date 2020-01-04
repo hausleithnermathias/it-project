@@ -42,7 +42,7 @@ public class PrintJobApi {
     private ApiClient apiClient;
 
     public PrintJobApi() {
-        this(Configuration.getDefaultApiClient());
+        this.apiClient = new ApiClient();
     }
 
     public PrintJobApi(ApiClient apiClient) {

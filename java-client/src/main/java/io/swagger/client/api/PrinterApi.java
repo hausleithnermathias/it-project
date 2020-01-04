@@ -54,7 +54,7 @@ public class PrinterApi {
     private ApiClient apiClient;
 
     public PrinterApi() {
-        this(Configuration.getDefaultApiClient());
+        this.apiClient = new ApiClient();
     }
 
     public PrinterApi(ApiClient apiClient) {

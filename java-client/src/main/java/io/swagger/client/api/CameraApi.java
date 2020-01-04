@@ -40,7 +40,7 @@ public class CameraApi {
     private ApiClient apiClient;
 
     public CameraApi() {
-        this(Configuration.getDefaultApiClient());
+        this.apiClient = new ApiClient();
     }
 
     public CameraApi(ApiClient apiClient) {

@@ -40,7 +40,7 @@ public class NetworkApi {
     private ApiClient apiClient;
 
     public NetworkApi() {
-        this(Configuration.getDefaultApiClient());
+        this.apiClient = new ApiClient();
     }
 
     public NetworkApi(ApiClient apiClient) {
