@@ -7,8 +7,6 @@ import io.swagger.client.api.PrintJobApi;
 import io.swagger.client.api.PrinterApi;
 import io.swagger.client.model.Head;
 import io.swagger.client.model.PrintJobHistory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,7 +17,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-//@Scope("Prototype")
 public class ApiServiceImpl {
 
     private Calendar calendar = Calendar.getInstance();
@@ -113,9 +110,6 @@ public class ApiServiceImpl {
                             measurements.add(lineChartDto);
                         })
                 );
-                // Logging
-                System.out.println(measurements.stream().map(Object::toString).collect(Collectors.joining("\n")));
-
                 return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
             }
         }
@@ -147,13 +141,11 @@ public class ApiServiceImpl {
                         })
                 );
 
-
                 return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
             }
         }
         return null;
     }
-
 
     public String getMaterialRemaining(String ip) {
         PrinterApi printerApi = new PrinterApi();
@@ -161,8 +153,6 @@ public class ApiServiceImpl {
         printerApi.getApiClient().setBasePath(basepath + ip + "/api/v1");
 
         MaterialsApi materialsApi = new MaterialsApi();
-
-
         List<Head> heads;
         List<LineChartDto> measurements = new ArrayList<>();
 
@@ -184,9 +174,6 @@ public class ApiServiceImpl {
                             }
                         })
                 );
-                // Logging
-                System.out.println(measurements.stream().map(Object::toString).collect(Collectors.joining("\n")));
-
                 return measurements.stream().map(Object::toString).collect(Collectors.joining("\n"));
             }
         }
@@ -225,7 +212,7 @@ public class ApiServiceImpl {
             try {
                 if(printerApi.printerStatusGet().compareTo("printing")==0) {
                     progress=Math.round(printJobApi.printJobProgressGet().doubleValue()*100);
-                    name=printJobApi.printJobNameGet();
+                    name=printJobApi.printJobNameGet().replace(" ","_");
                     if(name.compareTo("")!=0){
                         return "printjob_progress,printer="+id+",jobname="+name+" progress=" + progress;
                     }
@@ -245,6 +232,4 @@ public class ApiServiceImpl {
             return null;
         }
     }
-
-
 }
