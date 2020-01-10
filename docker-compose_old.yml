@@ -1,0 +1,12 @@
+api:
+  build: .
+  ports:
+    - "8080:8080"
+
+telegraf:
+  image: telegraf:1.12.5
+  links:
+    - influxdb
+    - api
+  volumes:
+    - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
