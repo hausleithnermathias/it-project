@@ -1,12 +1,20 @@
-api:
-  build: .
-  ports:
-    - "8080:8080"
+version: "3.7"
 
-telegraf:
-  image: telegraf:1.12.5
-  links:
-    - influxdb
-    - api
-  volumes:
-    - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+services:
+  api:
+    build: .
+    expose:
+      - 8080
+
+  telegraf:
+    image: telegraf:1.12.5
+    networks:
+      - default
+      - influxdb
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+
+networks:
+  influxdb:
+    external:
+      name: influxdb
