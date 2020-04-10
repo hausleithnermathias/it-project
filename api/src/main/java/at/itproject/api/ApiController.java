@@ -2,6 +2,7 @@ package at.itproject.api;
 
 import at.itproject.core.ApiServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

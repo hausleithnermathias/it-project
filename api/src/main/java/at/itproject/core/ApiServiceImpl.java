@@ -54,6 +54,7 @@ public class ApiServiceImpl {
         } else {
             status = "unknown";
         }
+
         return "printer_status,printer=" + id + ",weekday=" + strDays[calendar.get(Calendar.DAY_OF_WEEK) - 1] + ",month=" + strMonths[calendar.get(Calendar.MONTH)] + ",year=" + calendar.get(Calendar.YEAR) + " status=\"" + status + "\"";
     }
 
